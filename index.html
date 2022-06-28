@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>Simulador de temperatura</title>
+
+	<script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+	<!-- MEDIDOR PARA CELCIUS -->
+	<script type="text/javascript">
+    	google.charts.load('current', {'packages':['gauge']});
+		google.charts.setOnLoadCallback(drawChart);
+
+		function drawChart() {
+
+			var data = google.visualization.arrayToDataTable([
+		      ['Label', 'Value'],
+		      ['Celcius', 0]
+		    ]);
+
+		    var options = {
+		      width: 400*1.7, height: 120*1.7,
+		      yellowFrom: 100, yellowTo:200,
+		      redFrom: 200, redTo: 273.15,
+		      greenColor: '#00B8DC',
+		      greenFrom: -273.15, greenTo: 0,
+		      majorTicks: [-273.15,'0', 273.15],
+		      minorTicks: 4,
+		      min: -273.15,
+		      max: 273.15
+		    };
+
+		    var chart = new google.visualization.Gauge(document.getElementById('medidor1'));
+
+		    chart.draw(data, options);
+
+		    setInterval(function() {
+		      data.setValue(0, 1, c);
+		      chart.draw(data, options);
+		    }, 2000);
+		    
+		}
+    </script>
+
+    <!-- MEDIDOR PARA FARENHEINT -->
+    
+   <script type="text/javascript">
+      google.charts.load('current', {'packages':['gauge']});
+      google.charts.setOnLoadCallback(drawChart);
+
+      function drawChart() {
+
+        var data = google.visualization.arrayToDataTable([
+          ['Label', 'Value'],
+          ['Farenheint', 0]
+        ]);
+
+        var options = {
+          width: 400*1.7, height: 120*1.7,
+          redFrom: 312, redTo: 459.67,
+          yellowFrom:212, yellowTo: 312,
+          greenColor: '#00B8DC',
+          greenFrom: -459.67, greenTo: 32,
+          majorTicks:[-459.67, '', '0', '', 459.67],
+          minorTicks: 10,
+          min: -459.67,
+          max: 459.67
+        };
+
+        var chart = new google.visualization.Gauge(document.getElementById('medidor2'));
+
+        chart.draw(data, options);
+
+        setInterval(function() {
+          data.setValue(0, 1, f);
+          chart.draw(data, options);
+        }, 2000);
+        
+      }
+    </script>
+    <!-- MEDIDOR PARA KELVIN -->
+   <script type="text/javascript">
+      google.charts.load('current', {'packages':['gauge']});
+      google.charts.setOnLoadCallback(drawChart);
+
+      function drawChart() {
+
+        var data = google.visualization.arrayToDataTable([
+          ['Label', 'Value'],
+          ['Kelvin', 0]
+        ]);
+
+        var options = {
+          width: 400*1.7, height: 120*1.7,
+          redFrom: 500, redTo: 732.82,
+          yellowFrom:373.15, yellowTo: 500,
+          greenColor: '#00B8DC',
+          greenFrom: 0, greenTo: 273.15,
+          majorTicks: ['0', '', '', '', 732.82],
+          minorTicks: 10,
+          min: 0, max: 732.82,
+          animation:{
+          	easing: 'linear',
+          	duration: 1000
+          }
+          
+        };
+
+        var chart = new google.visualization.Gauge(document.getElementById('medidor3'));
+
+        chart.draw(data, options);
+
+        setInterval(function() {
+          data.setValue(0, 1, k);
+          chart.draw(data, options);
+        },2000);
+        
+      }
+    </script>
+    <!-- VALORES DE TEMPERATURAS DE DIFERENTES ESCALAS -->
+    <script type="text/javascript">
+    	var c = 100;
+    	var k = 373.15;
+    	var f = 212;
+    </script>
+
+    
+	
+</head>
+<body onload = "draw();">
+	<!-- SOURCES -->
+	<div class="sources" style="display: none;">
+		<div class="images">
+			<img src="sources/Fondo.png" id="source-fondo">
+			<img src="sources/termo.png" id="source-termo">
+			<img src="sources/sol.png" id="source-sol">
+		</div>
+	</div>
+
+
+	<!-- ELEMENTO CANVAS (LIENZO) -->
+	<div class="canvas-div">
+		<canvas id="canvas" width="1000px" height="600px" style="border: 1px solid black; float: left;overflow: auto; margin-right: 100px;">
+			<!-- DIBUJO DE CANVAS -->
+		    <script type="text/javascript">
+		    	
+				
+
+				var raf;
+				var running = false;
+
+				const mousePosition = {x:0, y:0};
+				function drawBackground(){
+					var fondo = document.getElementById('canvas').getContext('2d');
+					
+					fondo.globalCompositeOperation = 'destination-over'; // limpiar canvas
+					fondo.drawImage(document.getElementById('source-fondo'), 0, 0);
+
+
+					
+				};
+				function clear(){
+					fondo.fillStyle = 'rgba(255,255,255,1)';
+					fondo.fillRect(0,0,document.getElementById('canvas').width, document.getElementById('canvas').height);
+				};
+
+				
+
+				function termoDraw(){
+					var termoc = document.getElementById('canvas');
+					var termoctx = termoc.getContext('2d');
+					let x;
+					let y;
+					termoctx.drawImage(document.getElementById('source-termo'),100,100);
+					
+					
+					const moverTermo(cursorX, cursorY){
+						termoctx.beginPath();
+						termoctx.moveTo(mousePosition.x, mousePosition.y);
+						termoctx.moveTo(cursorX, cursorY);
+
+						mousePosition.x = cursorX;
+						mousePosition.y = cursorY;
+					}
+
+					const mouseDown = (evt) => {
+						mousePosition.x = evt.offsetX;
+						mousePosition.y = evt.offsetY;
+						moverTermo(x,y);
+						termoc.addEventListener('mousemove', mouseMoving);
+
+					}
+
+					const mouseMoving = (evt) => {
+						moverTermo(evt.offsetX, evt.offsetY);
+					}
+
+					termoc.addEventListener('mousedown', mouseDown);
+				};
+
+				
+
+				function solDraw(){
+					var solctx = document.getElementById('canvas').getContext('2d');
+					let x = 600;
+					let y = -100;
+					solctx.drawImage(document.getElementById('source-sol'),x,y);
+				};
+
+				function draw(){
+					clear();
+					raf = window.requestAnimationFrame(draw);
+				};
+
+
+
+				function ballaction(){
+					
+					/*var canvas = document.getElementById('canvas');
+					var ctx = canvas.getContext('2d');
+					var raf;
+					var running = false;
+
+
+					var termo = {
+					  x: 35,
+					  y: 35,
+					  drawTermo: function() {
+					    ctx.drawImage(document.getElementById('source-termo'),this.x,this.y);
+					  }
+					};
+
+					function clear() {
+					  ctx.fillStyle = 'rgba(255, 255, 255, 1)';
+					  ctx.fillRect(0,0,canvas.width,canvas.height);
+					}
+
+					
+
+					function draw() {
+						clear();
+						drawBackground();
+					    termo.drawTermo();
+					    if(running){
+					    	ball.x += ball.vx;
+							ball.y += ball.vy;
+							if (ball.y + ball.vy > canvas.height || ball.y + ball.vy < 0) {
+							    ball.vy = -ball.vy;
+							}
+							if (ball.x + ball.vx > canvas.width || ball.x + ball.vx < 0) {
+							    ball.vx = -ball.vx;
+							}
+					    }
+
+					    raf = window.requestAnimationFrame(draw);
+					}
+					
+
+					canvas.addEventListener('mousemove', function(e) {
+					  if (!running) {
+					    
+					    ball.x = e.clientX;
+					    ball.y = e.clientY;
+					    clear();
+					    ball.draw();
+					  }
+					});
+
+					canvas.addEventListener('click', function(e) {
+					  if (!running) {
+					  	raf = window.requestAnimationFrame(draw);
+					    running = true;
+					  }
+					});
+
+					canvas.addEventListener('mouseout', function(e){
+						
+						window.cancelAnimationFrame(raf);
+						running = false;
+					});
+					ball.draw();*/
+				};
+				
+				
+				
+				solDraw();
+				termoDraw();
+				
+				drawBackground();
+				clear();
+				
+				
+
+		    </script>
+		</canvas>
+	</div>
+
+	<div style="width:200px; height: 100%; background-color: greenyellow; float: left;">
+		<div id="medidor1">
+			
+		</div>
+		<div id="medidor2" style="background-color: red;">
+			
+		</div>
+		<div id=medidor3>
+			
+		</div>
+	</div>
+</body>
+</html>
